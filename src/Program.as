@@ -189,7 +189,8 @@ public class Program {
           return new Exec_Ret(Exec_Ret.T_out, 0, 0);
         }
         
-        if ( uint(problem.output[problem.output_it]) !=  uint(registers[sleft.R_Value()]) ) {
+        if ( uint(problem.output[problem.output_it]) != 
+                    uint(registers[sleft.R_Value()]) ) {
           error = Error_Code.Invalid_Output;
           compiler.Output_User("      ---- ERROR ---- ");
           compiler.Output_User("Expected " + problem.output[problem.output_it]);
@@ -341,13 +342,15 @@ public class Program {
         registers[sleft.R_Value()] = int(R_Value(sleft) / R_Value(srite));
       break;
       case Symbol.I_POW:
-        registers[sleft.R_Value()] = int(Math.pow(R_Value(sleft), R_Value(srite)));
+        registers[sleft.R_Value()] = int(Math.pow(R_Value(sleft),
+                                                R_Value(srite)));
       break;
       case Symbol.I_SQRT:
         registers[sleft.R_Value()] = int(Math.sqrt(R_Value(sleft)));
       break;
       case Symbol.I_LOG:
-        registers[sleft.R_Value()] = int(Math.log(R_Value(sleft))/Math.log(R_Value(srite)));
+        registers[sleft.R_Value()] = int(Math.log(R_Value(sleft))/
+                                        Math.log(R_Value(srite)));
       break;
     }
     return new Exec_Ret(Exec_Ret.T_good, 0);

@@ -74,7 +74,7 @@ package {
       // --- load
       var saved_file : SharedObject = SharedObject.getLocal("ciggbitt", "/");
       if ( !saved_file.data.hasOwnProperty("version") ) {
-        played_before = false;
+        played_before = true;
         Saver.output_global[0][0] = "IN AX\nADD AX -1\nOUT AX";
         return;
       }

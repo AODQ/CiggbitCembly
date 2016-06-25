@@ -51,7 +51,7 @@ package {
 		private function init(e:Event = null):void {
       removeEventListener(Event.ADDED_TO_STAGE, init);
       DejaVuSansMono.Init();
-      Tutorial.Initialize(null, this);
+        /* Tutorial.Initialize(null, this); */
       var i : int;
       slide_it   =  0;
       key_config = -1;

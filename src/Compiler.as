@@ -5,10 +5,16 @@ import flash.text.TextField;
 import flash.text.TextFieldType;
 import flash.text.TextFormat;
 import flash.text.TextFieldAutoSize;
+import flash.media.Sound;
 public class Compiler {
-  [Embed("../Imgs/currentline.png")] private var Img_CLine     : Class;
-  [Embed("../Imgs/errorline.png")  ] private var Img_ErrorLine : Class;
-  [Embed("../Imgs/stack_light.png")] private var Img_StackLight : Class;
+  [Embed("../Imgs/currentline.png")]    private var Img_CLine          : Class;
+  [Embed("../Imgs/errorline.png")  ]    private var Img_ErrorLine      : Class;
+  [Embed("../Imgs/stack_light.png")]    private var Img_StackLight     : Class;
+  [Embed("../Imgs/failed.mp3")]         private var Snd_Failed         : Class;
+  [Embed("../Imgs/start.mp3")]          private var Snd_Start          : Class;
+  [Embed("../Imgs/stop.mp3")]           private var Snd_Stop           : Class;
+  [Embed("../Imgs/success.mp3")]        private var Snd_Success        : Class;
+  [Embed("../Imgs/compile_failed.mp3")] private var Snd_Compile_Failed : Class;
   private var running : Boolean;
   private var score_out_it : int;
   public  var out     : TextField,
@@ -35,6 +41,13 @@ public class Compiler {
   private var ticks : int;
   public var  custom : Boolean;
 
+  private var snd_failed         : Sound;
+  private var snd_start          : Sound;
+  private var snd_stop           : Sound;
+  private var snd_success        : Sound;
+  private var snd_compile_failed : Sound;
+
+
   private static const console_x : int = 500,
                        console_y : int = 425,
                        registr_h : int = 20;
@@ -46,6 +59,12 @@ public class Compiler {
     input = _input;
     var i : int ; // temp iteration purposes
     score_out_it = -1;
+    // -- sounds
+    snd_failed         = new Snd_Failed()          as Sound;
+    snd_start          = new Snd_Start()           as Sound;
+    snd_stop           = new Snd_Stop()            as Sound;
+    snd_success        = new Snd_Success()         as Sound;
+    snd_compile_failed = new Snd_Compile_Failed () as Sound;
     // -- font
     running = false;
     // -- text (out)
@@ -320,6 +339,7 @@ public class Compiler {
             out.text = "Invalid symbol " + tstr.substr(0, 4) + "";
             input.Set_Subroutine(page);
             eline.y = 233 + Source.ft_y * i;
+            snd_compile_failed.play();
             return;
           }
           if ( tsym.R_Type() == Symbol.Memory &&
@@ -328,6 +348,7 @@ public class Compiler {
                        "Line " + i + "\n";
             input.Set_Subroutine(page);
             eline.y = 233 + Source.ft_y * i;
+            snd_compile_failed.play();
             return;
           }
           // store
@@ -348,6 +369,7 @@ public class Compiler {
                  "Line " + program.R_Error_LOC().toString();
       input.Set_Subroutine(program.R_Error_SR());
       eline.y = 233 + Source.ft_y * program.R_Error_LOC();
+      snd_compile_failed.play();
       return;
     }
     running = true;
@@ -356,6 +378,7 @@ public class Compiler {
     cline.y = 233;
     input.Set_Subroutine(0);
     sr_to_exec   = 0;
+    snd_start.play();
   }
 
   // --- code runner --------------------------------------------
@@ -403,6 +426,7 @@ public class Compiler {
           out.text = Error_Code.Instruction_strings[program.R_Error()] + '\n' +
                     program.R_Error_Det() + '\n';
         Refresh_Output();
+        snd_failed.play();
         return;
       }
       // progress program counter
@@ -464,6 +488,7 @@ public class Compiler {
         var count : int = 0;
         for ( var i : int = 0; i != Saver.levels_complete.length; ++ i )
           if ( Saver.levels_complete[i] == true ) ++ count;
+        snd_success.play();
         QuickKong.stats.submit("Levels Complete", count);
       }
     } else {
@@ -498,7 +523,8 @@ public class Compiler {
   public function Stop_Running(change_out:Boolean = true) : void {
     running = false;
     Saver.output_global[input.curr_problem] = code_copy;
-    input.Apply_String_To_Output(Saver.output_global[input.curr_problem][sr_to_exec]);
+    input.Apply_String_To_Output(Saver.output_global[input.curr_problem]
+                                                           [sr_to_exec]);
     Clear_Breakpoints();
     input.Clear_Speed();
     problem.output_it = 0;
